@@ -1,0 +1,70 @@
+Keep Cart 2.0.2 für Zen Cart 1.5.7 deutsch
+
+Copyright (c) C.J.Pinder 2009
+Aktualisierungen von yaseent (2016) und lat9 (2021-2022)
+Anpassung für Zen Cart deutsch 2022 by webchills
+
+=============== SINN UND ZWECK ===================
+
+Keep Cart speichert eine Kopie des Inhalts des Warenkorbs eines nicht eingeloggten Besuchers in einem Cookie.
+Dadurch bleibt der Warenkorb auch für noch nicht eingeloggte User erhalten.
+Der Inhalt des Warenkorbs wird automatisch neu geladen, wenn der Besucher zurück in Ihren Shop kommt oder wenn seine Sitzung abläuft und neu gestartet wird.
+Alle Artikel, die ausverkauft sind, deaktiviert oder gelöscht wurden, seit sie dem Warenkorb hinzugefügt wurden, werden entfernt, wenn der Warenkorb neu geladen wird.
+Die Produktmengen im Warenkorb werden beim Neuladen automatisch angepasst, um Überverkauf zu verhindern.
+Durch Verwendung eines admingesteuerten Secret Keys werden Manipulationen des Cookies auf dem Rechner der Besucher verhindert.
+
+
+=============== VORAUSSETZUNGEN ===================
+
+Dieses Modul ist ausschließlich für Zen cart 1.5.7 deutsch geeignet und setzt mindestens PHP 7.3.0 voraus
+
+
+=============== INSTALLATION ===================
+
+================= WICHTIG =====================
+Vor dem Einbau dieser Änderungen:
+BACKUP von Shop und Datenbank machen! 
+Keine Haftung, Verwendung auf eigene Gefahr!
+BACKUP gemacht? Ok, dann weiterlesen...
+
+
+1)
+Im Ordner NEUE DATEIEN den Ordner DEINADMIN auf den Namen Ihres Admin Verzeichnisses umbenennen
+Dann alle Ordner/Dateien aus diesem Ordner in der vorgegebenen Struktur ins Zen-Cart Verzeichnis hochladen.
+Dadurch werden keinerlei bestehenden Dateien überschrieben
+
+2)
+In der Zen Cart Administration auf irgendeinen Menüpunkt clicken, danach sind unter Konfiguration > Sitzungen/Sessions 3 neue Einstellungsmöglichkeiten für Keep Cart vorhanden.
+Alle Einstellungen sind dort erklärt.
+
+
+=============== DEINSTALLATION ===================
+
+1)
+Alle von diesem Modul neu angelegten Dateien vom Server löschen
+
+2)
+Die uninstall.sql im Ordner UNINSTALL mit einem Texteditor öffnen und den Inhalt kopieren
+Einfügen ins Eingabefeld unter Tools > SQL Paches installieren und absenden.
+
+
+
+
+VERSION HISTORY
+===============
+v2.0.2, 20220307, lat9
+    - Correct MySQL error when cart contains checkbox-type attributes.
+
+v2.0.1, 20211210, lat9/marco-pm
+    - Correct timeout after cart restored.
+
+v2.0.0, 20211109, lat9
+    - The minimum PHP version supported is 7.3.0, enables the 'samesite' attribute for the savecart cookies.
+      "Keep Cart" cookies are stored with 'samesite=lax'.
+    - Cookies are kept **only** for non-logged-in customers.  Otherwise, there would be duplication of products
+      restored to the customer's cart upon re-login.
+    - Admin installation now included, no more SQL-install script!
+
+v1.1: Release by C.J. Pinder, update by ayseent. December 2016
+
+v1.0: Release by C.J.Pinder. October 2009
