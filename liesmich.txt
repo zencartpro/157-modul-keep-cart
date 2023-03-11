@@ -1,8 +1,8 @@
-Keep Cart 2.0.2 für Zen Cart 1.5.7 deutsch
+Keep Cart 2.0.3 für Zen Cart 1.5.7 deutsch
 
 Copyright (c) C.J.Pinder 2009
-Aktualisierungen von yaseent (2016) und lat9 (2021-2022)
-Anpassung für Zen Cart deutsch 2022 by webchills
+Aktualisierungen von yaseent (2016) und lat9 (2021-2023)
+Anpassung für Zen Cart deutsch 2022-2023 by webchills
 
 =============== SINN UND ZWECK ===================
 
@@ -52,6 +52,12 @@ Einfügen ins Eingabefeld unter Tools > SQL Paches installieren und absenden.
 
 VERSION HISTORY
 ===============
+
+v2.0.3, 20221224, lat9
+    - Correct 'occasional' PHP warnings during cart-restoration from cookies.
+    - Log configuration errors only once per customer session.
+    - Ensure that cookies are removed when the cart is emptied.
+
 v2.0.2, 20220307, lat9
     - Correct MySQL error when cart contains checkbox-type attributes.
 

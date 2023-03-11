@@ -3,11 +3,11 @@
  * Keep Cart Plugin
  * Copyright C.J.Pinder 2009 (http://www.zen-unlocked.com)
  *
- * @copyright Copyright 2003-2022 Zen Cart Development Team
+ * @copyright Copyright 2003-2023 Zen Cart Development Team
  * Zen Cart German Version - www.zen-cart-pro.at
  * @copyright Portions Copyright 2003 osCommerce
  * @license https://www.zen-cart-pro.at/license/3_0.txt GNU General Public License V3.0
- * @version $Id: class.savecart.php 2022-07-27 10:00:40Z webchills $
+ * @version $Id: class.savecart.php 2023-03-11 10:04:40Z webchills $
  */
 // -----
 // Keeps the contents of a **not logged-in** customer's cart in a cookie (so they don't lose
@@ -26,11 +26,17 @@ class save_cart extends base
 
         if (defined('KEEP_CART_ENABLED') && KEEP_CART_ENABLED === 'True' && defined('KEEP_CART_DURATION') && defined('KEEP_CART_SECRET')) {
             if (version_compare(PHP_VERSION, '7.3.0', '<')) {
-                trigger_error('Keep Cart requires PHP 7.3.0 or later; currently using PHP ' . PHP_VERSION . '.  Keep Cart has been disabled.', E_USER_WARNING);
+                if (!isset($_SESSION['kc_disabled_logged'])) {
+                    trigger_error('Keep Cart requires PHP 7.3.0 or later; currently using PHP ' . PHP_VERSION . '.  Keep Cart has been disabled.', E_USER_WARNING);
+                }
+                $_SESSION['kc_disabled_logged'] = true;
                 return;
             }
             if (KEEP_CART_SECRET === 'change me') {
-                trigger_error('Keep Cart "Secret" setting requires change prior to use.  Keep Cart has been disabled.', E_USER_WARNING);
+                if (!isset($_SESSION['kc_disabled_logged'])) {
+                    trigger_error('Keep Cart "Secret" setting requires change prior to use.  Keep Cart has been disabled.', E_USER_WARNING);
+                }
+                $_SESSION['kc_disabled_logged'] = true;
                 return;
             }
             $this->attach($this, [
@@ -44,12 +50,24 @@ class save_cart extends base
                 'NOTIFY_HEADER_START_LOGOFF',
             ]);
 
-            if (isset($_COOKIE['cart']) && isset($_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
+            if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && isset($_SESSION['cart']) && empty($_SESSION['cart']->contents)) {
                 $cookie_value = $_COOKIE['cart'];
                 $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
                 if ($hash_key === $_COOKIE['cartkey']) {
                     $cart_contents = base64_decode($cookie_value);
                     $cart_contents = gzuncompress($cart_contents);
+                    // -----
+                    // If the uncompressed cookie contents' can't be uncompressed, the cookie's somehow
+                    // gotten to an invalid format; simply expire the cookie so that we'll start over.
+                    //
+                    if ($cart_contents === false) {
+                        $this->expireKeepCartCookie();
+                        return;
+                    }
+
+                    // -----
+                    // Otherwise, continue with the cart's restoration from the valid cookie.
+                    //
                     $_SESSION['cart']->contents = unserialize($cart_contents);
 
                     // -----
@@ -156,30 +174,36 @@ class save_cart extends base
             'httponly' => true,
             'samesite' => 'lax'
         ];
-        switch ($eventID)
-        {
+        switch ($eventID) {
             case 'NOTIFIER_CART_ADD_CART_END':
             case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
             case 'NOTIFIER_CART_CLEANUP_END':
             case 'NOTIFIER_CART_REMOVE_END':
-                if (!zen_is_logged_in() || zen_in_guest_checkout()) {
-                    $cookie_value = serialize($_SESSION['cart']->contents);
-                    $cookie_value = gzcompress($cookie_value, 9);
-                    $cookie_value = base64_encode($cookie_value);
-                    $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
-                    setcookie('cart', $cookie_value, $cookie_options);
-                    setcookie('cartkey', $hash_key, $cookie_options);
-                }
-                break;
+                if (!empty($_SESSION['cart']->contents)) {
+                    if (!zen_is_logged_in() || zen_in_guest_checkout()) {
+                        $cookie_value = serialize($_SESSION['cart']->contents);
+                        $cookie_value = gzcompress($cookie_value, 9);
+                        $cookie_value = base64_encode($cookie_value);
+                        $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
+                        setcookie('cart', $cookie_value, $cookie_options);
+                        setcookie('cartkey', $hash_key, $cookie_options);
+                    }
+                    break;
+                }               //- If cart is empty, fall through to expire the "Keep Cart" cookies
 
             case 'NOTIFIER_CART_RESET_END':
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
             case 'NOTIFIER_CART_RESTORE_CONTENTS_END':
-                $cookie_options['expires'] = time() - 3600;
-                setcookie('cart', '', $cookie_options);
-                setcookie('cartkey', '', $cookie_options);
+                $this->expireKeepCartCookie();
                 break;
         }
+    }
+
+    protected function expireKeepCartCookie()
+    {
+        $cookie_options['expires'] = time() - 3600;
+        setcookie('cart', '', $cookie_options);
+        setcookie('cartkey', '', $cookie_options);
     }
 }
