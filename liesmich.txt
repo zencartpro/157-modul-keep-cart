@@ -1,4 +1,4 @@
-Keep Cart 2.0.3 für Zen Cart 1.5.7 deutsch
+Keep Cart 2.0.4 für Zen Cart 1.5.7 deutsch
 
 Copyright (c) C.J.Pinder 2009
 Aktualisierungen von yaseent (2016) und lat9 (2021-2023)
@@ -52,6 +52,10 @@ Einfügen ins Eingabefeld unter Tools > SQL Paches installieren und absenden.
 
 VERSION HISTORY
 ===============
+
+v2.0.4, 20230607, lat9/torvista
+    - fixed bug preventing last cart item to be removed
+    - short syntax changes
 
 v2.0.3, 20221224, lat9
     - Correct 'occasional' PHP warnings during cart-restoration from cookies.
